@@ -1,16 +1,46 @@
 {
-    "Records": [
-        {
-            "keywords": "apple",
-            "limit": 5,
-            "color": "green",
-            "print_urls": true
-        },
-        {
-            "keywords": "universe",
-            "limit": 15,
-            "size": "large",
-            "print_urls": true
-        }
-    ]
+  "Records": [
+    {
+      "keywords": "food",
+      "limit": 2000,
+      "print_urls": true
+
+    },
+    {
+      "keywords": "Scenery",
+      "limit": 2000,
+      "print_urls": true
+
+    },
+    {
+      "keywords": "group photo",
+      "limit": 2000,
+      "print_urls": true
+
+    },
+    {
+      "keywords": "Screenshot",
+      "limit": 2000,
+      "print_urls": true
+
+    },
+    {
+      "keywords": "ID photo",
+      "limit": 2000,
+      "print_urls": true
+
+    },
+    {
+      "keywords": "selfie",
+      "limit": 2000,
+      "print_urls": true
+
+    },
+    {
+      "keywords": "animal",
+      "limit": 2000,
+      "print_urls": true
+
+    }
+  ]
 }

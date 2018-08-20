@@ -15,7 +15,7 @@ if cur_version >= version:  # If the Current Version of Python is 3.0 or above
     from urllib.parse import quote
     import http.client
     from http.client import IncompleteRead
-#     http.client._MAXHEADERS = 1000
+    http.client._MAXHEADERS = 1000
 else:  # If the Current Version of Python is 2.x
     import urllib2
     from urllib2 import Request, urlopen
@@ -40,7 +40,8 @@ args_list = ["keywords", "keywords_from_file", "prefix_keywords", "suffix_keywor
              "exact_size", "aspect_ratio", "type", "time", "time_range", "delay", "url", "single_image",
              "output_directory", "image_directory", "no_directory", "proxy", "similar_images", "specific_site",
              "print_urls", "print_size", "print_paths", "metadata", "extract_metadata", "socket_timeout",
-             "thumbnail", "language", "prefix", "chromedriver", "related_images", "safe_search", "no_numbering"]
+             "thumbnail", "language", "prefix", "chromedriver", "related_images", "safe_search", "no_numbering",
+             "offset"]
 
 
 def user_input():
@@ -109,6 +110,7 @@ def user_input():
         parser.add_argument('-ri', '--related_images', default=False, help="Downloads images that are similar to the keyword provided", action="store_true")
         parser.add_argument('-sa', '--safe_search', default=False, help="Turns on the safe search filter while searching for images", action="store_true")
         parser.add_argument('-nn', '--no_numbering', default=False, help="Allows you to exclude the default numbering of images", action="store_true")
+        parser.add_argument('-of', '--offset', help="Where to start in the fetched links", type=str, required=False)
 
         args = parser.parse_args()
         arguments = vars(args)
@@ -463,7 +465,6 @@ class googleimagesdownload:
         dir_name_thumbnail = dir_name + " - thumbnail"
         # make a search keyword  directory
         try:
-
             if not os.path.exists(main_directory):
                 os.makedirs(main_directory)
                 time.sleep(0.2)
@@ -514,12 +515,13 @@ class googleimagesdownload:
                 pathConvert =  main_directory + "/" + 'convert' + "/" + dir_name + " - thumbnail" + "/" + return_image_name
 
                 try:
-                    pathConvertDir = main_directory + "/" + 'convert' + "/" + dir_name + "/"
+                    pathConvertDir = main_directory + "/" + 'convert' + "/" + dir_name + " - thumbnail" + "/"
                     if not os.path.exists(pathConvertDir):
                         os.makedirs(pathConvertDir)
                     output_file = open(path, 'wb')
                     output_file.write(data)
                     output_file.close()
+
                     try:
                         im = Image.open(path)
                         im.convert("RGB")
@@ -531,8 +533,6 @@ class googleimagesdownload:
                     download_status = 'fail'
                     download_message = "OSError on an image...trying next one..." + " Error: " + str(e)
                 except IOError as e:
-                    if os.path.exists(path):
-                        os.remove(path)
                     download_status = 'fail'
                     download_message = "IOError on an image...trying next one..." + " Error: " + str(e)
 
@@ -604,16 +604,22 @@ class googleimagesdownload:
                 if no_numbering:
                     path = main_directory + "/" + dir_name + "/" + prefix + image_name
                     pathConvert = main_directory + "/"+ 'convert' + "/" + dir_name + "/" + prefix + image_name
+
                 else:
                     path = main_directory + "/" + dir_name + "/" + prefix + str(count) + ". " + image_name
                     pathConvert = main_directory + "/" + 'convert' + "/"+ dir_name +  "/" + prefix + str(count) + ". " + image_name
+
                 try:
                     pathConvertDir = main_directory + "/" + 'convert' + "/" + dir_name + "/"
                     if not os.path.exists(pathConvertDir):
                         os.makedirs(pathConvertDir)
+
+
                     output_file = open(path, 'wb')
                     output_file.write(data)
                     output_file.close()
+                    absolute_path = os.path.abspath(path)
+
                     try:
                         im = Image.open(path)
                         im.convert("RGB")
@@ -621,9 +627,8 @@ class googleimagesdownload:
                     except Exception as e :
                         if os.path.exists(pathConvert):
                             os.remove(pathConvert)
-                except Exception as e:
-                    if os.path.exists(path):
-                        os.remove(path)
+
+                except OSError as e:
                     download_status = 'fail'
                     download_message = "OSError on an image...trying next one..." + " Error: " + str(e)
                     return_image_name = ''
@@ -725,6 +730,9 @@ class googleimagesdownload:
                 break
             elif object == "":
                 page = page[end_content:]
+            elif arguments['offset'] and count < int(arguments['offset']):
+                    count += 1
+                    page = page[end_content:]
             else:
                 #format the item for readability
                 object = self.format_object(object)
@@ -845,7 +853,7 @@ class googleimagesdownload:
                 i = 0
                 while i < len(search_keyword):      # 2.for every main keyword
                     iteration = "\n" + "Item no.: " + str(i + 1) + " -->" + " Item name = " + str(pky) + str(search_keyword[i] + str(sky))
-                    print(str(iteration))
+                    print(iteration)
                     print("Evaluating...")
                     search_term = pky + search_keyword[i] + sky
 
